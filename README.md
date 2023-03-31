@@ -45,6 +45,8 @@ server {
     location ^~ /v1 {
         proxy_pass https://api.openai.com/v1;
         proxy_set_header Host api.openai.com;
+        proxy_ssl_name api.openai.com;
+        proxy_ssl_server_name on;
         #注意Bearer 后改为正确的token。如需用户自定义API key，可注释掉下一行
         proxy_set_header  Authorization "Bearer sk-your-token";
         proxy_pass_header Authorization;
@@ -58,6 +60,14 @@ server {
         index index.html;
     }
 }
+```
+如服务器无法正常访问`api.openai.com`, 可配合socat反代和http代理使用，proxy_pass配置改成
+```
+proxy_pass https://127.0.0.1:8443/v1;
+```
+并打开socat
+```
+socat TCP4-LISTEN:8443,reuseaddr,fork PROXY:http代理地址:api.openai.com:443,proxyport=http代理端口
 ```
 2. 配合Caddy使用，可以自动生产HTTPS证书。
 
